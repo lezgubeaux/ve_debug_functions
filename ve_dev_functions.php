@@ -17,7 +17,7 @@
  * Plugin URI:        https://ve-dev-functions.com
  * Description:       Various simple functions for debugging while developing a plugin 
  *                    (error_log to a file, for example)
- * Version:           1.1.0
+ * Version:           2.0.0
  * Author:            Vladimir Eric
  * Author URI:        https://framework.tech
  * License:           GPL-2.0+
@@ -27,107 +27,44 @@
  */
 
 /**
- * log output to a file in /wp-content
- * params: log content, empty(0,1), filename sufix
+ * @param $message: string, array, object
+ * @param $new: boolean
+ * @param $type: @deprecated
  */
+
 if (!function_exists('ve_debug_log')) {
-    function ve_debug_log($message, $title = '', $new = false)
+    function ve_debug_log($message, $title = '', $new = false, $type = '')
     {
-        $filename = WP_CONTENT_DIR . '/woo_cprlm__l_debug-' . $title . '.log';
+        $filename = WP_CONTENT_DIR . '/cvet___-' . $title . '.log';
 
         // empty the log if requested
         if ($new && file_exists($filename)) {
             wp_delete_file($filename);
         }
 
-        error_log("\r\n" . date('m/d/Y h:i:s a', time()) . " v" . "\r\n" .
-            $message . "\r\n", 3, $filename);
+        $output = "\r\n============================================ \r\n" . date('m/d/Y h:i:s a', time()) . "\r\n";
+        if (is_object($message)) {
+            $output .=
+                '<pre>' .
+                print_r($message, true) . "\r\n
+                </pre>";
+            // ' an OBJECT was passed !!!' . "\r\n";
+        } else if (is_array($message)) {
+            $output .=
+                '<pre>' .
+                var_export($message, true) . "\r\n
+                </pre>";
+        } else if (is_string($message)) {
+            $output .=
+                $message . "\r\n";
+        } else {
+            $output = '\r\n ### ERROR, submitted var is not a string, array, nor object!!!';
+        }
+        error_log($output, 3, $filename);
 
         return;
     }
 }
 
-/**
- * list all hooks of the site
- * (use ve_list_hooks() to output on any page)
- */
-if (!function_exists('ve_dump_hook')) {
-    function ve_dump_hook($tag, $hook)
-    {
-        $hook = json_decode(json_encode($hook), true);
-
-        ksort($hook);
-
-        echo "
-        <style>
-        .ve_dev_hooklist{
-            background-bottom:1px solid dotted;
-            position:relative;
-        }
-        .ve_dev_hooklist .ve_dev_popup{
-            display:none;
-            position:absolute;
-                left:0;
-                top:100px;
-                width:80%;
-                height:300px;
-                max-height:300px;
-                overflow-y:scroll;
-        }
-        .ve_dev_hooklist:hover{
-            background-color: lightgrey;
-        }
-        .ve_dev_hooklist:hover .ve_dev_popup{
-            background-color: white;
-            border:2px spolid #666;
-            display:block;
-        }
-        </style>
-        <pre class='ve_dev_hooklist'>>>>>>\t$tag<br>";
-
-        foreach ($hook as $priority => $functions) {
-
-            echo $priority;
-
-            foreach ($functions as $function)
-                echo "
-                <div class='ve_dev_popup'>";
-            if ($function['function'] != 'list_hook_details') {
-
-                echo "\t";
-
-                if (is_string($function['function']))
-                    echo $function['function'];
-
-                elseif (is_string($function['function'][0]))
-                    echo $function['function'][0] . ' -> ' . $function['function'][1];
-
-                elseif (is_object($function['function'][0]))
-                    echo "(object) " . get_class($function['function'][0]) . ' -> ' . $function['function'][1];
-
-                else
-                    print_r($function);
-
-                echo " (" . $function['accepted_args'] . ") <br>";
-            }
-            echo "
-                </div>";
-        }
-
-        echo '</pre>';
-    }
-}
-
-if (!function_exists('ve_list_hooks')) {
-    function ve_list_hooks($filter = false)
-    {
-        global $wp_filter;
-
-        $hooks = $wp_filter;
-        ksort($hooks);
-
-        foreach ($hooks as $tag => $hook)
-            if (false === $filter || false !== strpos($tag, $filter))
-                ve_dump_hook($tag, $hook);
-    }
-}
+// Remove the EditURI/RSD
+remove_action('wp_head', 'rsd_link');
