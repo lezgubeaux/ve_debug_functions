@@ -17,7 +17,7 @@
  * Plugin URI:        https://ve-dev-functions.com
  * Description:       Various simple functions for debugging while developing a plugin 
  *                    (error_log to a file, for example)
- * Version:           2.0.0
+ * Version:           1.1.0
  * Author:            Vladimir Eric
  * Author URI:        https://framework.tech
  * License:           GPL-2.0+
@@ -35,6 +35,7 @@
 if (!function_exists('ve_debug_log')) {
     function ve_debug_log($message, $title = '', $new = false, $type = '')
     {
+
         $filename = WP_CONTENT_DIR . '/cvet___-' . $title . '.log';
 
         // empty the log if requested
@@ -57,14 +58,18 @@ if (!function_exists('ve_debug_log')) {
         } else if (is_string($message)) {
             $output .=
                 $message . "\r\n";
+        } else if (is_bool($message)) {
+            $output .= $message ? 'TRUE' : 'FALSE';
+        } else if (is_integer($message)) {
+            $output .= strval($message);
         } else {
-            $output = '\r\n ### ERROR, submitted var is not a string, array, nor object!!!';
+            $type = gettype($message);
+            $output .= '\r\n ### ERROR, submitted var is not a string, array, nor object!!!' . PHP_EOL . 'It. is an ' . $type;
         }
         error_log($output, 3, $filename);
 
         return;
     }
 }
-
 // Remove the EditURI/RSD
 remove_action('wp_head', 'rsd_link');
