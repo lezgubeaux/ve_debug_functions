@@ -1,0 +1,23 @@
+@charset "UTF-8";
+
+/* general style for all debug divs */
+div[id ^= "ve_debug_"]{
+    background-color: yellow;
+        color: red;
+        font-weight: bold;
+    display: none;
+    padding: 10px;
+    position: fixed;
+        top: 100px;
+        left: 10px;
+    z-index: 999999;
+    max-width: 300px;
+        max-height: 300px;
+        min-width: 300px;
+        min-height: 300px;
+    overflow: scroll;
+}
+
+div.ve_debug_div_active{
+    display: block;
+}
